@@ -1,4 +1,4 @@
-import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { addHours, format } from 'date-fns'
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
@@ -13,7 +13,7 @@ import { useCourses } from './hooks/useCourses'
 import { useSettings } from './hooks/useSettings'
 import { useSync } from './hooks/useSync'
 import { supabase } from './lib/supabase'
-import type { BlockDraft, CalendarBlock, SyncHistory } from './types'
+import type { Assignment, BlockDraft, CalendarBlock, SyncHistory } from './types'
 
 interface SyncOutcome {
   ok: boolean
@@ -26,6 +26,7 @@ function Planner() {
   const [email, setEmail] = useState('')
   const [suggestionBannerCount, setSuggestionBannerCount] = useState(0)
   const [draft, setDraft] = useState<BlockDraft | null>(null)
+  const [activeAssignment, setActiveAssignment] = useState<Assignment | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [loadingSession, setLoadingSession] = useState(true)
   const [isDark, setIsDark] = useState(() => localStorage.getItem('theme') === 'dark')
@@ -178,7 +179,12 @@ function Planner() {
       <Route
         path="/"
         element={
-          <DndContext sensors={sensors}>
+          <DndContext
+            sensors={sensors}
+            onDragStart={(event) => setActiveAssignment(event.active.data.current?.assignment ?? null)}
+            onDragEnd={() => setActiveAssignment(null)}
+            onDragCancel={() => setActiveAssignment(null)}
+          >
             <main className="flex min-h-screen flex-col bg-slate-50 md:flex-row">
               <Sidebar
                 assignments={assignments}
@@ -249,6 +255,20 @@ function Planner() {
                   })
                 }}
               />
+
+              <DragOverlay>
+                {activeAssignment ? (
+                  <div className="w-52 rounded-xl border border-slate-200 bg-white p-3 shadow-xl dark:border-slate-700 dark:bg-slate-800 opacity-90 rotate-1">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-1 shrink-0 rounded-full" style={{ backgroundColor: activeAssignment.courses?.color ?? '#7F77DD' }} />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">{activeAssignment.title}</p>
+                        <p className="truncate text-xs text-slate-400">{activeAssignment.courses?.name ?? 'No course'}</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </DragOverlay>
 
               <BlockModal
                 open={Boolean(draft)}

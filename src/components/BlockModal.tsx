@@ -28,7 +28,8 @@ export function BlockModal({ open, mode, draft, onClose, onSave, onDelete }: Blo
 
   if (!open || !draft) return null
 
-  const endTime = format(addHours(new Date(startTime), duration), "yyyy-MM-dd'T'HH:mm")
+  const effectiveStart = startTime || draft.start_time
+  const endTime = format(addHours(new Date(effectiveStart), duration), "yyyy-MM-dd'T'HH:mm")
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()

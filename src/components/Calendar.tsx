@@ -88,14 +88,15 @@ export function Calendar({
       const overDayIso = event.over?.data.current?.dayIso as string | undefined
       if (!assignment || !overDayIso) return
 
-      const pointer = event.activatorEvent
+      const activatorEvent = event.activatorEvent
       const dayColumn = document.querySelector(`[data-day-column="${overDayIso}"]`) as HTMLElement | null
-      if (!dayColumn || !scrollRef.current || !(pointer instanceof MouseEvent || pointer instanceof PointerEvent)) {
+      if (!dayColumn || !scrollRef.current || !(activatorEvent instanceof MouseEvent || activatorEvent instanceof PointerEvent)) {
         return
       }
 
       const rect = dayColumn.getBoundingClientRect()
-      const relativeY = pointer.clientY - rect.top + scrollRef.current.scrollTop
+      const dropClientY = activatorEvent.clientY + event.delta.y
+      const relativeY = dropClientY - rect.top + scrollRef.current.scrollTop
       const boundedY = Math.max(0, Math.min(VISIBLE_HOURS * HOUR_HEIGHT - 30, relativeY))
       const minutesFromDayStart = Math.round(boundedY)
 
@@ -205,8 +206,8 @@ export function Calendar({
             const overloadHours = scheduledHoursByDay[index]
 
             return (
-              <div key={day.toISOString()} className="flex flex-1 min-w-0 flex-col">
-                <div className={`sticky top-0 z-10 border-b border-slate-200 bg-white p-2 text-center dark:border-slate-700 dark:bg-slate-900 ${isSameDay(day, new Date()) ? 'bg-cyan-50 dark:bg-cyan-950/40' : ''}`}>
+              <div key={day.toISOString()} className={`flex flex-1 min-w-0 flex-col ${isSameDay(day, new Date()) ? 'bg-sky-50/60 dark:bg-sky-950/20' : ''}`}>
+                <div className={`sticky top-0 z-10 border-b border-slate-200 p-2 text-center dark:border-slate-700 ${isSameDay(day, new Date()) ? 'bg-sky-100 dark:bg-sky-950/50' : 'bg-white dark:bg-slate-900'}`}>
                   <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{format(day, 'EEE d')}</p>
                   <OverloadWarning hours={overloadHours} threshold={overloadThreshold} />
                 </div>
