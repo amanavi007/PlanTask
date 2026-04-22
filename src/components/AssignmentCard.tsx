@@ -55,13 +55,13 @@ export function AssignmentCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`rounded-xl border bg-white p-3 shadow-sm transition ${isDragging ? 'opacity-60' : ''} ${assignment.is_complete ? 'opacity-60' : ''}`}
+      className={`rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition dark:border-slate-700 dark:bg-slate-800 ${isDragging ? 'opacity-60' : ''} ${assignment.is_complete ? 'opacity-60' : ''}`}
     >
       <div className="flex items-start gap-2">
         <div className="w-1 self-stretch rounded-full" style={{ backgroundColor: assignment.courses?.color ?? '#7F77DD' }} />
         <button
           type="button"
-          className="mt-0.5 rounded p-1 text-slate-500 hover:bg-slate-100"
+          className="mt-0.5 rounded p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
           {...listeners}
           {...attributes}
           onClick={(event) => event.stopPropagation()}
@@ -71,7 +71,7 @@ export function AssignmentCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <p className={`truncate font-medium ${assignment.is_complete ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+            <p className={`truncate font-medium ${assignment.is_complete ? 'line-through text-slate-400' : 'text-slate-900 dark:text-slate-100'}`}>
               {assignment.title}
             </p>
             {isSuggested ? (
@@ -81,7 +81,7 @@ export function AssignmentCard({
               </span>
             ) : null}
           </div>
-          <p className="text-xs text-slate-400">{assignment.courses?.name ?? 'No course'}</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500">{assignment.courses?.name ?? 'No course'}</p>
           <p className={`text-xs ${dueDateColor}`}>Due {dueDateLabel}</p>
 
           <div className="mt-2 flex items-center gap-2">
@@ -99,7 +99,7 @@ export function AssignmentCard({
           {isSuggested ? (
             <button
               type="button"
-              className="rounded p-1 text-slate-400 hover:bg-slate-100"
+              className="rounded p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
               onClick={(event) => {
                 event.stopPropagation()
                 onDismissSuggestion(assignment.id)

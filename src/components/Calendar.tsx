@@ -37,7 +37,7 @@ function DayColumn({ day, children }: DayColumnProps) {
   return (
     <div
       ref={droppable.setNodeRef}
-      className={`relative min-w-[140px] border-l border-slate-100 ${droppable.isOver ? 'bg-cyan-50' : ''}`}
+      className={`relative min-w-[140px] border-l border-slate-100 dark:border-slate-700/60 ${droppable.isOver ? 'bg-cyan-50 dark:bg-cyan-950/30' : ''}`}
       data-day-column={day.toISOString()}
     >
       {children}
@@ -57,7 +57,20 @@ export function Calendar({
 }: CalendarProps) {
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
   const [mobileDayIndex, setMobileDayIndex] = useState(0)
+  const [slideDir, setSlideDir] = useState<'forward' | 'back'>('forward')
+  const [animKey, setAnimKey] = useState(0)
   const scrollRef = useRef<HTMLDivElement | null>(null)
+
+  const goBack = () => {
+    setSlideDir('back')
+    setAnimKey((k) => k + 1)
+    setWeekStart((prev) => addWeeks(prev, -1))
+  }
+  const goForward = () => {
+    setSlideDir('forward')
+    setAnimKey((k) => k + 1)
+    setWeekStart((prev) => addWeeks(prev, 1))
+  }
 
   const days = useMemo(() => {
     return Array.from({ length: 7 }).map((_, index) => addDays(weekStart, index))
@@ -143,35 +156,35 @@ export function Calendar({
   const showMobile = window.innerWidth < 768
 
   return (
-    <section className="flex-1 overflow-hidden" id="planner-calendar">
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3">
+    <section className="flex-1 overflow-hidden dark:bg-slate-900" id="planner-calendar">
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
         <div className="flex items-center gap-2">
-          <button type="button" className="rounded border border-slate-200 p-1" onClick={() => setWeekStart((prev) => addWeeks(prev, -1))}>
+          <button type="button" className="rounded border border-slate-200 p-1 dark:border-slate-600 dark:text-slate-300" onClick={goBack}>
             <ChevronLeft size={16} />
           </button>
-          <button type="button" className="rounded border border-slate-200 p-1" onClick={() => setWeekStart((prev) => addWeeks(prev, 1))}>
+          <button type="button" className="rounded border border-slate-200 p-1 dark:border-slate-600 dark:text-slate-300" onClick={goForward}>
             <ChevronRight size={16} />
           </button>
           <button
             type="button"
-            className="rounded border border-slate-200 px-2 py-1 text-sm"
-            onClick={() => setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}
+            className="rounded border border-slate-200 px-2 py-1 text-sm dark:border-slate-600 dark:text-slate-300"
+            onClick={() => { setSlideDir('forward'); setAnimKey((k) => k + 1); setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 })) }}
           >
             Today
           </button>
         </div>
-        <p className="text-sm text-slate-700">
+        <p className="text-sm text-slate-700 dark:text-slate-300">
           {format(weekStart, 'MMM d')} - {format(endOfWeek(weekStart, { weekStartsOn: 1 }), 'MMM d')}
         </p>
       </header>
 
-      <div className="border-b border-slate-100 px-2 py-2 md:hidden">
+      <div className="border-b border-slate-100 px-2 py-2 dark:border-slate-700 md:hidden">
         <div className="flex gap-1 overflow-x-auto">
           {days.map((day, index) => (
             <button
               key={day.toISOString()}
               type="button"
-              className={`rounded-full px-3 py-1 text-xs ${mobileDayIndex === index ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'}`}
+              className={`rounded-full px-3 py-1 text-xs ${mobileDayIndex === index ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'}`}
               onClick={() => setMobileDayIndex(index)}
             >
               {format(day, 'EEE d')}
@@ -180,8 +193,11 @@ export function Calendar({
         </div>
       </div>
 
-      <div ref={scrollRef} className="h-[calc(100vh-160px)] overflow-y-auto overflow-x-hidden">
-        <div className="flex">
+      <div ref={scrollRef} className="h-[calc(100vh-160px)] overflow-y-auto overflow-x-hidden dark:bg-slate-900">
+        <div
+          key={animKey}
+          className={`flex ${slideDir === 'forward' ? 'animate-slide-from-right' : 'animate-slide-from-left'}`}
+        >
           {days.map((day, index) => {
             if (showMobile && index !== mobileDayIndex) return null
 
@@ -190,8 +206,8 @@ export function Calendar({
 
             return (
               <div key={day.toISOString()} className="flex flex-1 min-w-0 flex-col">
-                <div className={`sticky top-0 z-10 border-b border-slate-200 bg-white p-2 text-center ${isSameDay(day, new Date()) ? 'bg-cyan-50' : ''}`}>
-                  <p className="text-sm font-medium text-slate-800">{format(day, 'EEE d')}</p>
+                <div className={`sticky top-0 z-10 border-b border-slate-200 bg-white p-2 text-center dark:border-slate-700 dark:bg-slate-900 ${isSameDay(day, new Date()) ? 'bg-cyan-50 dark:bg-cyan-950/40' : ''}`}>
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{format(day, 'EEE d')}</p>
                   <OverloadWarning hours={overloadHours} threshold={overloadThreshold} />
                 </div>
 
@@ -202,10 +218,10 @@ export function Calendar({
                       return (
                         <div
                           key={`${day.toISOString()}-${hour}`}
-                          className="absolute left-0 right-0 border-t border-dashed border-slate-100 text-[10px] text-slate-400"
+                          className="absolute left-0 right-0 border-t border-dashed border-slate-100 text-[10px] text-slate-400 dark:border-slate-700/60"
                           style={{ top: index * HOUR_HEIGHT }}
                         >
-                          <span className="-translate-y-1/2 rounded bg-white px-1">{String(hour).padStart(2, '0')}:00</span>
+                          <span className="-translate-y-1/2 rounded bg-white px-1 dark:bg-slate-900 dark:text-slate-500">{String(hour).padStart(2, '0')}:00</span>
                         </div>
                       )
                     })}

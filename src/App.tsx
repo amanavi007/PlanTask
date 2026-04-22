@@ -28,6 +28,12 @@ function Planner() {
   const [draft, setDraft] = useState<BlockDraft | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [loadingSession, setLoadingSession] = useState(true)
+  const [isDark, setIsDark] = useState(() => localStorage.getItem('theme') === 'dark')
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark)
+    localStorage.setItem('theme', isDark ? 'dark' : 'light')
+  }, [isDark])
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
 
@@ -180,6 +186,8 @@ function Planner() {
                 syncHistory={syncHistory}
                 suggestionsCount={suggestionBannerCount}
                 syncing={syncing}
+                isDark={isDark}
+                onToggleDark={() => setIsDark((d) => !d)}
                 onDismissBanner={() => setSuggestionBannerCount(0)}
                 onOpenSettings={() => navigate('/settings')}
                 onRefresh={() => void handleGlobalRefresh()}

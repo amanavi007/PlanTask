@@ -44,22 +44,22 @@ export function BlockModal({ open, mode, draft, onClose, onSave, onDelete }: Blo
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/50 p-4">
-      <form className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl" onSubmit={handleSubmit}>
-        <h3 className="text-lg font-semibold text-slate-900">{mode === 'create' ? 'Create study block' : 'Edit block'}</h3>
-        <p className="text-sm text-slate-600">{draft.title}</p>
+      <form className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl dark:bg-slate-800" onSubmit={handleSubmit}>
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{mode === 'create' ? 'Create study block' : 'Edit block'}</h3>
+        <p className="text-sm text-slate-600 dark:text-slate-400">{draft.title}</p>
 
-        <label className="mt-4 block text-sm font-medium text-slate-700">Start time</label>
+        <label className="mt-4 block text-sm font-medium text-slate-700 dark:text-slate-300">Start time</label>
         <input
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
+          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
           type="datetime-local"
           value={startTime}
           onChange={(event) => setStartTime(event.target.value)}
           required
         />
 
-        <label className="mt-3 block text-sm font-medium text-slate-700">Duration (hours)</label>
+        <label className="mt-3 block text-sm font-medium text-slate-700 dark:text-slate-300">Duration (hours)</label>
         <input
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
+          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
           type="number"
           min={0.5}
           step={0.5}
@@ -68,18 +68,18 @@ export function BlockModal({ open, mode, draft, onClose, onSave, onDelete }: Blo
           required
         />
 
-        <p className="mt-2 text-xs text-slate-500">End time: {format(new Date(endTime), 'PPP p')}</p>
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">End time: {format(new Date(endTime), 'PPP p')}</p>
 
-        <label className="mt-3 block text-sm font-medium text-slate-700">Notes</label>
+        <label className="mt-3 block text-sm font-medium text-slate-700 dark:text-slate-300">Notes</label>
         <textarea
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
+          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
           rows={3}
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
         />
 
         {mode === 'edit' ? (
-          <label className="mt-3 flex items-center gap-2 text-sm text-slate-700">
+          <label className="mt-3 flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
             <input type="checkbox" checked={isDone} onChange={(event) => setIsDone(event.target.checked)} />
             Session done
           </label>
@@ -103,7 +103,7 @@ export function BlockModal({ open, mode, draft, onClose, onSave, onDelete }: Blo
           )}
 
           <div className="flex gap-2">
-            <button type="button" className="rounded-lg border border-slate-200 px-3 py-2" onClick={onClose}>
+            <button type="button" className="rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-600 dark:text-slate-300" onClick={onClose}>
               Cancel
             </button>
             <button type="submit" className="rounded-lg bg-cyan-600 px-3 py-2 font-medium text-white">

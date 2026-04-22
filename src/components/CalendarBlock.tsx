@@ -98,12 +98,12 @@ export function CalendarBlockItem({
       {contextMenu ? (
         <div
           ref={menuRef}
-          className="fixed z-50 min-w-[160px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+          className="fixed z-50 min-w-[160px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
           style={{ left: contextMenu.x, top: contextMenu.y }}
         >
           <button
             type="button"
-            className="flex w-full items-center px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
+            className="flex w-full items-center px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700"
             onClick={() => {
               onToggleSkip(block)
               setContextMenu(null)
@@ -113,10 +113,10 @@ export function CalendarBlockItem({
           </button>
           {!isSkipped ? (
             <>
-              <div className="mx-2 my-1 border-t border-slate-100" />
+              <div className="mx-2 my-1 border-t border-slate-100 dark:border-slate-700" />
               <button
                 type="button"
-                className="flex w-full items-center px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
+                className="flex w-full items-center px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700"
                 onClick={() => {
                   onSkipAllByTitle(title)
                   setContextMenu(null)
