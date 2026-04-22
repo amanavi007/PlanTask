@@ -199,6 +199,33 @@ function Planner() {
                   setDraft(nextDraft)
                 }}
                 onEditBlock={handleEditBlock}
+                onToggleSkipBlock={(block) => {
+                  void saveBlock({
+                    id: block.id,
+                    assignment_id: block.assignment_id,
+                    start_time: block.start_time,
+                    end_time: block.end_time,
+                    notes: block.notes,
+                    is_done: !block.is_done,
+                    source: block.source,
+                    title: block.title,
+                  })
+                }}
+                onSkipAllByTitle={(title) => {
+                  const targets = blocks.filter((b) => b.source === 'gcal' && b.title === title && !b.is_done)
+                  for (const block of targets) {
+                    void saveBlock({
+                      id: block.id,
+                      assignment_id: block.assignment_id,
+                      start_time: block.start_time,
+                      end_time: block.end_time,
+                      notes: block.notes,
+                      is_done: true,
+                      source: block.source,
+                      title: block.title,
+                    })
+                  }
+                }}
                 onResizeBlock={(blockId, newEndTime) => {
                   const block = blocks.find((item) => item.id === blockId)
                   if (!block || block.source === 'gcal') return

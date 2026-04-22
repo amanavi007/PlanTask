@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { FunctionsHttpError } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import type { SyncResult } from '../types'
 
@@ -27,21 +28,16 @@ export function useSync(userId: string | null) {
       setLoading(false)
 
       if (error) {
-        console.error(`Failed to sync ${type}`, error)
         let message = error.message
-
-        const maybeContext = (error as { context?: { json?: () => Promise<{ error?: string }> } }).context
-        if (maybeContext?.json) {
+        if (error instanceof FunctionsHttpError) {
           try {
-            const body = await maybeContext.json()
-            if (body?.error) {
-              message = body.error
-            }
+            const body = await error.context.json()
+            if (body?.error) message = body.error
           } catch {
-            // Keep default error message.
+            // fall through to default message
           }
         }
-
+        console.error(`Failed to sync ${type}:`, message, error)
         setLastError(message)
         return { result: null, errorMessage: message }
       }

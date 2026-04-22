@@ -7,6 +7,8 @@ import { CalendarBlockItem } from './CalendarBlock'
 import { OverloadWarning } from './OverloadWarning'
 
 const HOUR_HEIGHT = 60
+const DAY_START_HOUR = 5
+const VISIBLE_HOURS = 24 - DAY_START_HOUR
 
 interface CalendarProps {
   assignments: Assignment[]
@@ -15,6 +17,8 @@ interface CalendarProps {
   onCreateDraftFromDrop: (draft: BlockDraft) => void
   onEditBlock: (block: CalendarBlock) => void
   onResizeBlock: (blockId: string, newEndTime: string) => void
+  onToggleSkipBlock: (block: CalendarBlock) => void
+  onSkipAllByTitle: (title: string) => void
 }
 
 interface DayColumnProps {
@@ -48,6 +52,8 @@ export function Calendar({
   onCreateDraftFromDrop,
   onEditBlock,
   onResizeBlock,
+  onToggleSkipBlock,
+  onSkipAllByTitle,
 }: CalendarProps) {
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
   const [mobileDayIndex, setMobileDayIndex] = useState(0)
@@ -59,7 +65,7 @@ export function Calendar({
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = 7 * HOUR_HEIGHT
+      scrollRef.current.scrollTop = 0
     }
   }, [])
 
@@ -77,11 +83,11 @@ export function Calendar({
 
       const rect = dayColumn.getBoundingClientRect()
       const relativeY = pointer.clientY - rect.top + scrollRef.current.scrollTop
-      const boundedY = Math.max(0, Math.min(24 * HOUR_HEIGHT - 30, relativeY))
-      const minutesFromMidnight = Math.round(boundedY)
+      const boundedY = Math.max(0, Math.min(VISIBLE_HOURS * HOUR_HEIGHT - 30, relativeY))
+      const minutesFromDayStart = Math.round(boundedY)
 
       const start = startOfDay(new Date(overDayIso))
-      start.setMinutes(minutesFromMidnight)
+      start.setMinutes(DAY_START_HOUR * 60 + minutesFromDayStart)
 
       onCreateDraftFromDrop({
         assignment_id: assignment.id,
@@ -174,8 +180,8 @@ export function Calendar({
         </div>
       </div>
 
-      <div ref={scrollRef} className="h-[calc(100vh-160px)] overflow-y-auto">
-        <div className="flex min-w-[980px] md:min-w-0">
+      <div ref={scrollRef} className="h-[calc(100vh-160px)] overflow-y-auto overflow-x-hidden">
+        <div className="flex">
           {days.map((day, index) => {
             if (showMobile && index !== mobileDayIndex) return null
 
@@ -183,28 +189,31 @@ export function Calendar({
             const overloadHours = scheduledHoursByDay[index]
 
             return (
-              <div key={day.toISOString()} className="flex flex-1 min-w-[220px] flex-col">
+              <div key={day.toISOString()} className="flex flex-1 min-w-0 flex-col">
                 <div className={`sticky top-0 z-10 border-b border-slate-200 bg-white p-2 text-center ${isSameDay(day, new Date()) ? 'bg-cyan-50' : ''}`}>
                   <p className="text-sm font-medium text-slate-800">{format(day, 'EEE d')}</p>
                   <OverloadWarning hours={overloadHours} threshold={overloadThreshold} />
                 </div>
 
                 <DayColumn day={day}>
-                  <div className="relative" style={{ height: 24 * HOUR_HEIGHT }}>
-                    {Array.from({ length: 24 }).map((_, hour) => (
-                      <div
-                        key={`${day.toISOString()}-${hour}`}
-                        className="absolute left-0 right-0 border-t border-dashed border-slate-100 text-[10px] text-slate-400"
-                        style={{ top: hour * HOUR_HEIGHT }}
-                      >
-                        <span className="-translate-y-1/2 rounded bg-white px-1">{String(hour).padStart(2, '0')}:00</span>
-                      </div>
-                    ))}
+                  <div className="relative" style={{ height: VISIBLE_HOURS * HOUR_HEIGHT }}>
+                    {Array.from({ length: VISIBLE_HOURS }).map((_, index) => {
+                      const hour = DAY_START_HOUR + index
+                      return (
+                        <div
+                          key={`${day.toISOString()}-${hour}`}
+                          className="absolute left-0 right-0 border-t border-dashed border-slate-100 text-[10px] text-slate-400"
+                          style={{ top: index * HOUR_HEIGHT }}
+                        >
+                          <span className="-translate-y-1/2 rounded bg-white px-1">{String(hour).padStart(2, '0')}:00</span>
+                        </div>
+                      )
+                    })}
 
                     {dayBlocks.map((block) => {
                       const start = new Date(block.start_time)
                       const end = new Date(block.end_time)
-                      const top = start.getHours() * HOUR_HEIGHT + start.getMinutes()
+                      const top = (start.getHours() - DAY_START_HOUR) * HOUR_HEIGHT + start.getMinutes()
                       const height = Math.max((end.getTime() - start.getTime()) / (1000 * 60), 30)
 
                       const linkedAssignment = assignments.find((assignment) => assignment.id === block.assignment_id)
@@ -223,6 +232,8 @@ export function Calendar({
                           color={color}
                           onOpen={onEditBlock}
                           onResizeStart={handleResizeStart}
+                          onToggleSkip={onToggleSkipBlock}
+                          onSkipAllByTitle={onSkipAllByTitle}
                         />
                       )
                     })}
